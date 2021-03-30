@@ -1,0 +1,32 @@
+@startuml
+queue Kinesis as kin
+participant Consumer as cns
+database "Redis Token Bucket" as redis
+boundary "mParticle Service API" as mp
+
+autonumber
+loop for every incoming event from Kinesis
+    |||
+    activate redis
+    |||
+    kin -> cns: incoming event
+    cns -> redis: INCR bucketKey 1
+    redis --> cns: bucketKey value
+    alt buketKey value < max requests per period
+        |||
+        note over cns, mp: Token is valid, make request to mParticle
+        cns -[#green]> mp: post event
+        mp --[#green]> cns: receive result
+        |||
+    else buketKey value >= max requests per period
+        |||
+        hnote over cns, mp
+            Token is not valid, skip processing this time.
+        end note
+        |||
+    end
+    |||
+    deactivate redis
+    |||
+end
+@enduml

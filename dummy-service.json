@@ -1,0 +1,6 @@
+{
+    "healthz": {
+        "status": "ok"
+    }
+}
+

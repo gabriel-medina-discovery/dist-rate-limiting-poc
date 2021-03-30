@@ -1,0 +1,18 @@
+@startuml
+control "Resetter" as rst
+database "Redis\nToken\nBucket" as redis
+
+autonumber
+loop every N millisec
+    rst -> redis: SET bucketKey 0
+    note over redis
+        Key's value is INCreased
+        by consumers continuously.
+    end note
+    note over redis
+        Resetter takes the value
+        SETs the value back to
+        zero (0), every N millisecs.
+    end note
+end
+@enduml

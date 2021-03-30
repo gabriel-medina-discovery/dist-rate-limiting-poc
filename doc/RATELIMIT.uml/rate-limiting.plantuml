@@ -1,0 +1,19 @@
+@startuml
+database "Redis\nToken\nBucket" as redis
+node "Consumer 1" as c1
+node "Consumer 2" as c2
+node "Resetter" as rst
+cloud "mParticle\nService" as svc
+queue Kinesis as kin
+
+kin -[#green]----> c1: incoming\nevent
+kin -[#green]----> c2: incoming\nevent
+rst -[#violet,dotted]--> redis: reset count\nevery n\nmillisecs
+c1 -[#red,dotted]-> c1: 2. no token,\njust wait.
+c2 -[#red,dotted]-> c2: 2. no token,\njust wait.
+c1 <-[#gray,dotted]- redis: 1. get\ntoken
+c2 <-[#gray,dotted]- redis: 1. get\ntoken
+c1 ---[#green]-> svc: 3. got token,\nmake request
+c2 ---[#green]-> svc: 3. got token,\nmake request
+rst .[#violet,dotted].> rst: n millisec\ntimer
+@enduml
